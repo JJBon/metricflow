@@ -24,6 +24,7 @@ class SqlEngine(Enum):
     SNOWFLAKE = "Snowflake"
     DATABRICKS = "Databricks"
     TRINO = "Trino"
+    ATHENA = "Athena"
 
 
 class SqlClient(Protocol):

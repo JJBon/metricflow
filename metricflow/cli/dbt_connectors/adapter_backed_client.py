@@ -22,6 +22,7 @@ from metricflow.sql.render.redshift import RedshiftSqlQueryPlanRenderer
 from metricflow.sql.render.snowflake import SnowflakeSqlQueryPlanRenderer
 from metricflow.sql.render.sql_plan_renderer import SqlQueryPlanRenderer
 from metricflow.sql.render.trino import TrinoSqlQueryPlanRenderer
+from metricflow.sql.render.athena import AthenaSqlQueryPlanRenderer
 from metricflow.sql.sql_bind_parameters import SqlBindParameters
 from metricflow.sql_request.sql_request_attributes import SqlJsonTag, SqlRequestId, SqlRequestTagSet
 from metricflow.sql_request.sql_statement_metadata import CombinedSqlTags, SqlStatementCommentMetadata
@@ -44,6 +45,7 @@ class SupportedAdapterTypes(enum.Enum):
     BIGQUERY = "bigquery"
     DUCKDB = "duckdb"
     TRINO = "trino"
+    ATHENA = "athena"
 
     @property
     def sql_engine_type(self) -> SqlEngine:
@@ -62,6 +64,8 @@ class SupportedAdapterTypes(enum.Enum):
             return SqlEngine.DUCKDB
         elif self is SupportedAdapterTypes.TRINO:
             return SqlEngine.TRINO
+        elif self is SupportedAdapterTypes.ATHENA: 
+            return SqlEngine.Athena
         else:
             assert_values_exhausted(self)
 
@@ -82,6 +86,8 @@ class SupportedAdapterTypes(enum.Enum):
             return DuckDbSqlQueryPlanRenderer()
         elif self is SupportedAdapterTypes.TRINO:
             return TrinoSqlQueryPlanRenderer()
+        elif self is SupportedAdapterTypes.ATHENA:
+            return AthenaSqlQueryPlanRenderer()
         else:
             assert_values_exhausted(self)
 
@@ -229,6 +235,14 @@ class AdapterBackedSqlClient:
                 has_error = False if str(result[0]) == "SUCCESS" else True
                 if has_error:
                     raise DbtDatabaseError("Encountered error in Trino dry run.")
+                
+        if self.sql_engine_type is SqlEngine.ATHENA:
+            with self._adapter.connection_named(connection_name):
+                # Either the response will be bool value or a string with error message from Trino.
+                result = self._adapter.execute(f"EXPLAIN (type validate) {stmt}", auto_begin=True, fetch=True)
+                has_error = False if str(result[0]) == "SUCCESS" else True
+                if has_error:
+                    raise DbtDatabaseError("Encountered error in Athena dry run.")
 
         elif self.sql_engine_type is SqlEngine.BIGQUERY:
             with self._adapter.connection_named(connection_name):

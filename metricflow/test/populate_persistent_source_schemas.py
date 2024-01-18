@@ -30,6 +30,7 @@ def populate_schemas(test_configuration: MetricFlowTestConfiguration) -> None:  
         or test_configuration.engine is SqlEngine.DATABRICKS
         or test_configuration.engine is SqlEngine.REDSHIFT
         or test_configuration.engine is SqlEngine.TRINO
+        or test_configuration.engine is SqlEngine.ATHENA
     ):
         engine_name = test_configuration.engine.value.lower()
         os.environ["MF_TEST_ADAPTER_TYPE"] = engine_name

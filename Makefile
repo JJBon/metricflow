@@ -63,6 +63,10 @@ populate-persistent-source-schema-snowflake:
 test-trino:
 	hatch -v run trino-env:pytest -vv -n $(PARALLELISM) $(ADDITIONAL_PYTEST_OPTIONS) metricflow/test/
 
+.PHONY: test-athena
+test-athena:
+	hatch -v run athena-env:pytest -vv -n $(PARALLELISM) $(ADDITIONAL_PYTEST_OPTIONS) metricflow/test/
+
 .PHONY: lint
 lint:
 	hatch -v run dev-env:pre-commit run --all-files

@@ -53,6 +53,9 @@ snowflake = [
 trino = [
   "dbt-trino~=1.7.0"
 ]
+athena = [
+  "dbt-athena~=1.7.0"
+]
 
 [tool.hatch.build.targets.sdist]
 exclude = [
